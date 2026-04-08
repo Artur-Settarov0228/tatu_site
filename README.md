@@ -1,388 +1,217 @@
-# tatu_site
 ```
-nb_monitoring/
-├── manage.py
-├── requirements/
-│   ├── base.txt
-│   ├── dev.txt
-│   └── prod.txt
-├── .env
-├── config/                      # project config (settings)
+┌─────────────────────────────────────────────────────────────┐
+│                      FOYDALANUVCHI TIZIMI                     │
+├─────────────────────────────────────────────────────────────┤
+│  MaxsusFoydalanuvchi (AbstractUser)                          │
+│  ├── roli: [ADMIN, OQITUVCHI, OTA_ONA]                      │
+│  ├── telefon, telegram_chat_id, tasdiqlangan                 │
+│  └── JWT + Session Autentifikatsiya                          │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  ┌─────────┐  ┌──────────┐  ┌─────────┐                    │
+│  │ ADMIN   │  │ OQITUVCHI │  │ OTA-ONA │                    │
+│  │ Panel   │  │ Panel     │  │ Panel   │                    │
+│  │ To'liq  │  │ Cheklangan│  │ Faqat   │                    │
+│  │ Kirish  │  │ Kirish    │  │ Ko'rish │                    │
+│  └─────────┘  └──────────┘  └─────────┘                    │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                      TALABALAR ASOSI                          │
+├─────────────────────────────────────────────────────────────┤
+│  Talaba ──────┬────── Guruh                                  │
+│  ├── ism      │       ├── nomi                               │
+│  ├── talaba_id│       ├── kurs ────┐                        │
+│  ├── telefon  │       └── yo'nalish ─┤                       │
+│  └── ota_ona_telefon                 │                        │
+│       │                               │                        │
+│       ▼                               ▼                        │
+│  OtaOnaTalaba ◄──────────────────────┘                        │
+│  ├── qarindoshlik                                             │
+│  └── asosiy                                                   │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    DAVOMAT TIZIMI                             │
+├─────────────────────────────────────────────────────────────┤
+│  Davomat                                                     │
+│  ├── talaba (FK)                                            │
+│  ├── fan (FK)                                               │
+│  ├── sana                                                   │
+│  ├── holat: [KELDI, KELMADI]                               │
+│  ├── sabab: [KASAL, SABABSIZ, RUXSAT BILAN]                │
+│  └── kim_kiritdi (Oqituvchi)                                │
+│                                                             │
+│  Jadval                                                      │
+│  ├── guruh, fan, oqituvchi                                  │
+│  ├── hafta_kuni, boshlanish_vaqti, tugash_vaqti            │
+│  └── xona                                                   │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   XABARNOMA MOTORI                            │
+├─────────────────────────────────────────────────────────────┤
+│  ⚠️ Qoidalar:                                                │
+│  • 2 NB → OGOHLANTIRISH                                      │
+│  • 3 NB → XABAR (Ota-ona + Telegram)                        │
+│  • Ketma-ket NB → Telegram Xabari                           │
+│                                                             │
+│  Xabarnoma                                                   │
+│  ├── talaba, ota_ona                                        │
+│  ├── turi, matn                                             │
+│  ├── nb_soni, ketma_ket_nb                                 │
+│  └── yuborildi, yuborilgan_vaqt                             │
+│                                                             │
+│  KuzatuvQaydi (barcha harakatlar)                           │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   YETKAZISH KANALLARI                         │
+├─────────────────────────────────────────────────────────────┤
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
+│  │  VEB PANEL   │  │ TELEGRAM BOT │  │  EMAIL       │     │
+│  │              │  │              │  │  (Ixtiyoriy) │     │
+│  │ • Admin      │  │ • /start     │  │              │     │
+│  │ • Oqituvchi  │  │ • Telefon    │  │              │     │
+│  │ • Ota-ona    │  │ • Statistika │  │              │     │
+│  └──────────────┘  └──────────────┘  └──────────────┘     │
+└─────────────────────────────────────────────────────────────┘
+davomat_tizimi/
+├── boshqar.py
+│
+├── sozlamalar/
 │   ├── __init__.py
-│   ├── asgi.py
-│   ├── wsgi.py
-│   ├── urls.py
-│   ├── celery.py
-│   └── settings/
+│   ├── asosiy.py              # Asosiy sozlamalar
+│   ├── ishlab_chiqarish.py    # Ishchi muhit sozlamalari
+│   └── sinov.py               # Sinov muhiti sozlamalari
+│
+├── ilovalar/
+│   ├── __init__.py
+│   │
+│   ├── umumiy/
+│   │   ├── __init__.py
+│   │   ├── modellar.py        # AsosiyModel, VaqtBelgiliModel
+│   │   ├── ruxsatlar.py       # RolAsosidaRuxsat
+│   │   ├── dekoratorlar.py    # @rol_talab_qilinadi
+│   │   ├── sahifalash.py      # Maxsus sahifalash
+│   │   └── yordamchilar.py    # Yordamchi funksiyalar
+│   │
+│   ├── foydalanuvchilar/
+│   │   ├── __init__.py
+│   │   ├── modellar.py        # Foydalanuvchi, Oqituvchi, OtaOna
+│   │   ├── seriyalashtiruvchilar.py   # FoydalanuvchiSeriyalashtiruvchi
+│   │   ├── korinishlar/
+│   │   │   ├── __init__.py
+│   │   │   ├── kirish_korinishlari.py    # Kirish, Chiqish
+│   │   │   ├── foydalanuvchi_korinishlari.py
+│   │   │   └── ota_ona_korinishlari.py
+│   │   ├── marshrutlar.py
+│   │   ├── xizmatlar.py       # FoydalanuvchiXizmati
+│   │   ├── tanlovchilar.py    # FoydalanuvchiTanlovchi
+│   │   └── shablonlar/
+│   │       └── foydalanuvchilar/
+│   │           ├── ota_ona_bosh_sahifasi.html
+│   │           └── farzand_tafsilotlari.html
+│   │
+│   ├── talabalar/
+│   │   ├── __init__.py
+│   │   ├── modellar.py        # Talaba, Guruh, Kurs, Yonalish
+│   │   ├── seriyalashtiruvchilar.py
+│   │   ├── korinishlar.py
+│   │   ├── marshrutlar.py
+│   │   ├── xizmatlar.py       # TalabaXizmati
+│   │   ├── tanlovchilar.py    # TalabaTanlovchi
+│   │   └── shablonlar/
+│   │       └── talabalar/
+│   │           ├── royxat.html
+│   │           ├── yaratish.html
+│   │           ├── tahrirlash.html
+│   │           └── tafsilotlar.html
+│   │
+│   ├── davomat/
+│   │   ├── __init__.py
+│   │   ├── modellar.py        # Davomat, Fan, Jadval
+│   │   ├── seriyalashtiruvchilar.py
+│   │   ├── korinishlar.py
+│   │   ├── marshrutlar.py
+│   │   ├── xizmatlar.py       # DavomatXizmati
+│   │   ├── tanlovchilar.py
+│   │   └── shablonlar/
+│   │       └── davomat/
+│   │           ├── index.html
+│   │           ├── kop_davomat.html
+│   │           └── tarix.html
+│   │
+│   ├── xabarnomalar/
+│   │   ├── __init__.py
+│   │   ├── modellar.py        # Xabarnoma
+│   │   ├── seriyalashtiruvchilar.py
+│   │   ├── korinishlar.py
+│   │   ├── marshrutlar.py
+│   │   ├── xizmatlar.py       # XabarnomaXizmati
+│   │   ├── vazifalar.py       # Celery vazifalari
+│   │   ├── telegram_bot.py    # Bot boshqaruvchisi
+│   │   └── shablonlar/
+│   │       └── xabarnomalar/
+│   │           └── sozlamalar.html
+│   │
+│   └── tahlillar/
 │       ├── __init__.py
-│       ├── base.py
-│       ├── dev.py
-│       └── prod.py
+│       ├── modellar.py
+│       ├── seriyalashtiruvchilar.py
+│       ├── korinishlar.py
+│       ├── marshrutlar.py
+│       ├── xizmatlar.py       # TahlilXizmati
+│       └── shablonlar/
+│           └── tahlillar/
+│               ├── bosh_sahifa.html
+│               ├── xavf_hisoboti.html
+│               └── guruh_statistikasi.html
 │
-├── apps/
-│   ├── users/
-│   │   ├── models.py
-│   │   ├── managers.py
-│   │   ├── serializers.py
-│   │   ├── views.py
-│   │   ├── urls.py
-│   │   ├── services.py
-│   │   ├── selectors.py
-│   │   ├── permissions.py
-│   │   └── admin.py
-│   │
-│   ├── students/
-│   │   ├── models.py
-│   │   ├── serializers.py
-│   │   ├── views.py
-│   │   ├── urls.py
-│   │   ├── services.py
-│   │   ├── selectors.py
-│   │   └── admin.py
-│   │
-│   ├── attendance/
-│   │   ├── models.py
-│   │   ├── serializers.py
-│   │   ├── views.py
-│   │   ├── urls.py
-│   │   ├── services.py
-│   │   ├── selectors.py
-│   │   └── admin.py
-│   │
-│   ├── notifications/
-│   │   ├── models.py
-│   │   ├── services.py
-│   │   ├── tasks.py
-│   │   └── telegram.py
-│   │
-│   └── common/
-│       ├── models.py
-│       ├── utils.py
-│       ├── constants.py
-│       └── mixins.py
+├── shablonlar/
+│   ├── asosiy/
+│   │   ├── asosiy.html
+│   │   ├── yon_panel.html
+│   │   ├── bosh_menu.html
+│   │   └── pastki_qism.html
+│   ├── autentifikatsiya/
+│   │   ├── kirish.html
+│   │   └── royhatdan_otish.html
+│   └── bosh_sahifalar/
+│       ├── admin_bosh_sahifasi.html
+│       ├── oqituvchi_bosh_sahifasi.html
+│       └── ota_ona_bosh_sahifasi.html
 │
-├── templates/
-│   ├── base/
-│   │   ├── base.html
-│   │   ├── navbar.html
-│   │   └── sidebar.html
-│   │
-│   ├── auth/
-│   │   └── login.html
-│   │
-│   ├── dashboard/
-│   │   └── dashboard.html
-│   │
-│   ├── students/
-│   │   ├── list.html
-│   │   ├── create.html
-│   │   └── edit.html
-│   │
-│   └── attendance/
-│       └── mark.html
-│
-├── static/
+├── statik/
 │   ├── css/
+│   │   ├── tailwind.css
+│   │   ├── maxsus.css
+│   │   └── qorongu_rejim.css
 │   ├── js/
-│   └── images/
+│   │   ├── asosiy.js
+│   │   ├── davomat.js
+│   │   └── grafiklar.js
+│   └── rasmlar/
 │
-├── bot/
-│   ├── main.py
-│   ├── handlers/
-│   ├── keyboards/
-│   ├── services/
-│   └── states/
+├── talablar/
+│   ├── asosiy.txt
+│   ├── ishlab_chiqarish.txt
+│   └── sinov.txt
 │
-└── docker/
-    ├── Dockerfile
-    └── docker-compose.yml
-# 🎯 VAZIFA
-
-Men universitet talabalarining dars qoldirishini (NB) nazorat qiluvchi to‘liq tizim yaratmoqchiman.
-
-Tizim quyidagilardan iborat bo‘lsin:
-
-1. Django + Django REST Framework (backend)
-2. PostgreSQL (database)
-3. Telegram bot (faqat ota-onalar uchun)
-4. Django Template asosida zamonaviy admin panel (frontend)
-5. Celery + Redis (background tasks)
-6. JWT + Session auth (web uchun)
-7. Role-based access control (ADMIN, TEACHER, PARENT)
-
----
-
-# 🔐 AUTH VA LOGIN SYSTEM
-
-## Web uchun:
-
-* Login sahifa:
-
-  * username / phone
-  * password
-* Logout
-* Session-based auth
-* Admin va Teacher login qiladi
-
-## UI:
-
-* Zamonaviy dizayn (Bootstrap / Tailwind)
-* Dark/light variant (optional)
-
----
-
-# 🧑‍🎓 TALABALAR PANELI (ADMIN PANEL)
-
-Login bo‘lgandan keyin:
-
-## 📋 Student List Page
-
-* Table ko‘rinish:
-
-  * F.I.Sh
-  * Guruh
-  * Kurs
-  * Yo‘nalish
-  * NB soni
-* Search
-* Filter:
-
-  * group
-  * course
-
-## ➕ Student Create
-
-Forma:
-
-* ism
-* familya
-* group
-* kurs
-* yo‘nalish
-* telefon
-
-## ✏️ Student Edit
-
-* update qilish
-* delete (soft delete)
-
----
-
-# 📅 ATTENDANCE PANEL
-
-## Sahifa:
-
-* Student tanlash
-* Sana
-* Subject
-* Status:
-
-  * PRESENT
-  * ABSENT
-* Reason:
-
-  * kasal
-  * sababsiz
-  * ruxsat bilan
-
-## UI:
-
-* tez belgilash (checkbox list)
-* bulk submit
-
----
-
-# 🔔 NOTIFICATION LOGIC
-
-* 2 NB → warning
-* 3 NB → parent alert
-* ketma-ket NB → alert
-
-Telegram orqali yuborilsin.
-
----
-
-# 🤖 TELEGRAM BOT (FAKAT OTA-ONA UCHUN)
-
-## Flow:
-
-1. /start
-2. telefon yuborish
-3. tasdiqlash
-4. farzandini tanlash
-
-## Feature:
-
-* 📊 NB statistikasi
-* 📅 oxirgi darslar
-* ⚠️ ogohlantirishlar
-
----
-
-# 🧠 DATABASE MODELLAR
-
-Quyidagilarni yoz:
-
-* Custom User:
-
-  * role (ADMIN, TEACHER, PARENT)
-
-* Student
-
-* Group
-
-* Teacher
-
-* Parent
-
-* ParentStudent
-
-* Attendance:
-
-  * status
-  * reason
-  * date
-  * subject
-
-* Schedule
-
-* AuditLog
-
-Har biri uchun:
-
-* fieldlar
-* FK va M2M
-* indexlar
-* unique constraint
-* best practice
-
----
-
-# ⚙️ DJANGO STRUCTURE (CLEAN ARCHITECTURE)
-
-Project structure:
-
-* apps/
-
-  * users/
-  * students/
-  * attendance/
-  * notifications/
-  * common/
-
-Har bir app:
-
-* models.py
-* serializers.py
-* views.py
-* urls.py
-* services.py
-* selectors.py
-
----
-
-# 🔌 API (DRF)
-
-Yozib ber:
-
-## Student
-
-* CRUD
-* pagination
-* filtering
-
-## Attendance
-
-* create
-* bulk create
-* history
-
-## Analytics
-
-* top NB studentlar
-* group stats
-
----
-
-# 🎨 FRONTEND (DJANGO TEMPLATE)
-
-Quyidagilarni to‘liq yoz:
-
-## Layout
-
-* sidebar
-* navbar
-* dashboard
-
-## Pages:
-
-1. Login page (chiroyli UI)
-2. Dashboard
-3. Student list
-4. Student create/edit
-5. Attendance page
-
-## UX:
-
-* responsive design
-* table + pagination
-* alert messages
-
----
-
-# ⚡ CELERY + REDIS
-
-Tasks:
-
-* notification send
-* report generate
-
-Retry mechanism yoz
-
----
-
-# 📊 ANALYTICS
-
-* eng ko‘p NB qilganlar
-* trend (hafta/oy)
-* group kesimida
-
----
-
-# 🧠 ADVANCED
-
-* risk score:
-
-  * NB soni
-  * ketma-ket NB
-
-* QR attendance (optional)
-
----
-
-# 🚀 TALABLAR
-
-* production-ready kod
-* clean architecture
-* service layer
-* validation
-* error handling
-* logging
-
----
-
-# 🧭 JAVOB FORMAT
-
-Bosqichma-bosqich chiqar:
-
-1. Database schema
-2. Django models
-3. DRF serializers
-4. Views + API
-5. Template (HTML + CSS)
-6. Telegram bot
-7. Celery setup
-
-Har bir qismni alohida yoz va tushuntir.
-
----
+├── docker/
+│   ├── Dockerfile
+│   ├── docker-compose.yml
+│   └── nginx.conf
+│
+├── skriptlar/
+│   ├── ozgartirish.sh
+│   ├── migrate.sh
+│   └── zaxiralash.sh
+│
+├── .env.misol
+├── .gitignore
+└── README.md
