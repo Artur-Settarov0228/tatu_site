@@ -1,19 +1,9 @@
-from apps.users.models import Foydalanuvchi, OtaOna
-import random
+from .models import Foydalanuvchi
 
-class FoydalanuvchiXizmati:
-    
+class UserService:
     @staticmethod
-    def telegram_bilan_boglash(telefon, chat_id):
+    def get_user_by_telefon(telefon):
         try:
-            user = Foydalanuvchi.objects.get(telefon=telefon, roli='OTA_ONA')
-            user.telegram_chat_id = chat_id
-            user.tasdiqlangan = True
-            user.save()
-            return user
+            return Foydalanuvchi.objects.get(telefon=telefon)
         except Foydalanuvchi.DoesNotExist:
             return None
-    
-    @staticmethod
-    def tasdiqlash_kodi_yarat():
-        return str(random.randint(100000, 999999))
