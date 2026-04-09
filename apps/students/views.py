@@ -1,9 +1,9 @@
 from rest_framework import generics, filters
 from rest_framework.permissions import IsAuthenticated
-from .models import Talaba, Guruh
-from .serializers import TalabaSerializer, GuruhSerializer
+from .models import Talaba, Guruh, Kurs, Yonalish
+from .serializers import TalabaSerializer, GuruhSerializer, KursSerializer, YonalishSerializer
 
-class TalabaRoyxatiView(generics.ListCreateAPIView):
+class TalabaListView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = TalabaSerializer
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
@@ -20,7 +20,7 @@ class TalabaRoyxatiView(generics.ListCreateAPIView):
             return user.ota_ona_profili.talabalar.filter(aktiv=True)
         return Talaba.objects.none()
 
-class TalabaTafsilotView(generics.RetrieveUpdateDestroyAPIView):
+class TalabaDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = TalabaSerializer
     
@@ -34,8 +34,17 @@ class TalabaTafsilotView(generics.RetrieveUpdateDestroyAPIView):
             return user.ota_ona_profili.talabalar.all()
         return Talaba.objects.none()
 
-class GuruhRoyxatiView(generics.ListAPIView):
+class GuruhListView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = GuruhSerializer
     queryset = Guruh.objects.filter(aktiv=True)
-    search_fields = ['nomi']
+
+class KursListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = KursSerializer
+    queryset = Kurs.objects.all()
+
+class YonalishListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = YonalishSerializer
+    queryset = Yonalish.objects.all()

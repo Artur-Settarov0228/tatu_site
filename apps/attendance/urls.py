@@ -1,7 +1,8 @@
 from django.urls import path
-from .views import DavomatRoyxatiView, FanRoyxatiView
+from .views import DavomatListView, FanListView, JadvalListView
 
 urlpatterns = [
-    path('', DavomatRoyxatiView.as_view(), name='davomat_royxati'),
-    path('fans/', FanRoyxatiView.as_view(), name='fan_royxati'),
+    path('', DavomatListView.as_view(), name='davomat-list'),
+    path('fans/', FanListView.as_view(), name='fan-list'),
+    path('schedule/', JadvalListView.as_view(), name='jadval-list'),
 ]

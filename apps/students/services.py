@@ -1,10 +1,9 @@
 from .models import Talaba
 
-class TalabaXizmati:
+class TalabaService:
     @staticmethod
-    def nb_statistikasi(talaba_id):
+    def get_talaba_by_id(talaba_id):
         try:
-            talaba = Talaba.objects.get(id=talaba_id)
-            return {'talaba': talaba.toliq_ism, 'jami_nb': talaba.nb_soni, 'ketma_ket': talaba.ketma_ket_nb_olish()}
+            return Talaba.objects.get(id=talaba_id)
         except Talaba.DoesNotExist:
             return None

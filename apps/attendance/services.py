@@ -1,11 +1,11 @@
 from .models import Davomat
 from datetime import date
 
-class DavomatXizmati:
+class DavomatService:
     @staticmethod
-    def bugungi_davomat(guruh_id):
+    def get_today_attendance(guruh_id):
         return Davomat.objects.filter(talaba__guruh_id=guruh_id, sana=date.today())
     
     @staticmethod
-    def talaba_davomati(talaba_id, oy, yil):
-        return Davomat.objects.filter(talaba_id=talaba_id, sana__year=yil, sana__month=oy)
+    def get_student_nb(talaba_id):
+        return Davomat.objects.filter(talaba_id=talaba_id, holat='KELMADI').count()
