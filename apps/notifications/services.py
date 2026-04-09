@@ -1,48 +1,39 @@
 import logging
-from django.utils import timezone
-from .models import Xabarnoma, XabarnomaSozlamalari
-from .tasks import telegram_xabar_yubor
+from django.conf import settings
+from .tasks import send_telegram_message
 
 logger = logging.getLogger(__name__)
 
-def nb_chegarasini_tekshir(talaba):
-    nb_soni = talaba.nb_soni
-    ketma_ket = talaba.ketma_ket_nb_olish()
-    
-    if nb_soni == 3:
-        xabarnoma_yarat(talaba, 'ALERT', f"⚠️ Diqqat! {talaba.toliq_ism} 3 marta dars qoldirdi!", nb_soni, ketma_ket)
-    elif nb_soni == 5:
-        xabarnoma_yarat(talaba, 'WARNING', f"⚠️ Ogohlantirish! {talaba.toliq_ism} 5 marta dars qoldirdi!", nb_soni, ketma_ket)
-    
-    if ketma_ket >= 3:
-        xabarnoma_yarat(talaba, 'ALERT', f"⚠️ {talaba.toliq_ism} {ketma_ket} kun ketma-ket dars qoldirdi!", nb_soni, ketma_ket)
+def check_nb_and_notify(talaba, nb_count):
+    """
+    NB soni 5 dan oshganda ota-onaga xabar yuborish
+    """
+    # Faqat 5 va undan ko'p bo'lganda xabar yuboramiz
+    if nb_count >= 5:
+        # Talabaning barcha ota-onalariga xabar yuborish
+        for ota_ona in talaba.ota_onalar.all():
+            if ota_ona.foydalanuvchi.telegram_chat_id:
+                # Xabar matnini tayyorlash
+                message = f"""
+⚠️ *DIQQAT!* ⚠️
 
-def xabarnoma_yarat(talaba, tur, sarlavha, nb_soni=0, ketma_ket_nb=0):
-    for ota_ona in talaba.ota_onalar.all():
-        xabarnoma = Xabarnoma.objects.create(
-            talaba=talaba, ota_ona=ota_ona, tur=tur, sarlavha=sarlavha,
-            matn=sarlavha, nb_soni=nb_soni, ketma_ket_nb=ketma_ket_nb
-        )
-        xabarni_yubor(xabarnoma)
+Farzandingiz *{talaba.toliq_ism}* 
+🎓 Guruh: {talaba.guruh.nomi}
 
-def xabarni_yubor(xabarnoma):
-    ota_ona = xabarnoma.ota_ona
-    if not ota_ona:
-        return
-    
-    try:
-        sozlamalar = ota_ona.xabarnoma_sozlamalari
-    except XabarnomaSozlamalari.DoesNotExist:
-        sozlamalar = None
-    
-    if sozlamalar and sozlamalar.telegram_xabar:
-        if ota_ona.foydalanuvchi.telegram_chat_id:
-            telegram_xabar_yubor.delay(
-                chat_id=ota_ona.foydalanuvchi.telegram_chat_id,
-                matn=xabarnoma.matn,
-                sarlavha=xabarnoma.sarlavha,
-                tur=xabarnoma.tur
-            )
-            xabarnoma.yuborildi = True
-            xabarnoma.yuborilgan_vaqt = timezone.now()
-            xabarnoma.save()
+❌ *{nb_count}* marta dars qoldirgan!
+
+Bu jiddiy muammo bo'lishi mumkin.
+Iltimos, farzandingiz bilan suhbatlashing va sababini bilib oling.
+
+📊 /stats - Statistika ko'rish
+📅 /davomat - Davomat tarixi
+
+--- 
+Davomat Tizimi
+"""
+                # Xabarni yuborish
+                send_telegram_message.delay(
+                    ota_ona.foydalanuvchi.telegram_chat_id,
+                    message
+                )
+                logger.info(f"Xabar yuborildi: {ota_ona.foydalanuvchi.telefon}")

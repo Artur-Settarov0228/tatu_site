@@ -1,4 +1,44 @@
 ```
+┌─────────────────────────────────────────────────────────────────┐
+│                        1. OTA-ONA BOTGA KIRISH                    │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│   Telegramda @davomat_bot → /start                               │
+│                              ↓                                    │
+│   Bot: "Telefon raqamingizni yuboring"                           │
+│                              ↓                                    │
+│   Ota-ona: Telefon raqamni yuboradi (+998901234567)              │
+│                              ↓                                    │
+│   Bot: "✅ Telefon raqamingiz saqlandi!"                          │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                        2. O'QITUVCHI DAVOMAT KIRITADI             │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│   O'qituvchi Admin panelga kirib:                                │
+│   - Talabani tanlaydi                                            │
+│   - "KELMADI" deb belgilaydi                                     │
+│   - Sababini tanlaydi (Sababsiz/Kasal/Ruxsat bilan)              │
+│                              ↓                                    │
+│   Tizim NB sonini hisoblaydi                                     │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓
+┌─────────────────────────────────────────────────────────────────┐
+│                   3. NB SONI TEKSHIRILADI                         │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│   Agar NB soni ≥ 5 bo'lsa:                                       │
+│                              ↓                                    │
+│   "⚠️ Diqqat! Farzandingiz 5-marta dars qoldirdi!"               │
+│                              ↓                                    │
+│   Xabar Ota-onaning Telegramiga yuboriladi                       │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+
+
 ┌─────────────────────────────────────────────────────────────┐
 │                      FOYDALANUVCHI TIZIMI                     │
 ├─────────────────────────────────────────────────────────────┤
